@@ -18,15 +18,11 @@
 
 body{
 
-  margin:0;
+ margin:0;
 
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 
-  background:#071522;
-
-  color:white;
-
-  text-align:center
+ background:#071522;color:white;text-align:center
 
 }
 
@@ -40,9 +36,9 @@ h1{font-size:30px;margin:6px 0 2px}
 
 .exercise{
 
-  font-size:25px;font-weight:900;min-height:62px;
+ font-size:25px;font-weight:900;min-height:62px;
 
-  display:flex;align-items:center;justify-content:center
+ display:flex;align-items:center;justify-content:center
 
 }
 
@@ -56,9 +52,9 @@ h1{font-size:30px;margin:6px 0 2px}
 
 .progress{
 
-  height:12px;background:#243341;border-radius:99px;
+ height:12px;background:#243341;border-radius:99px;
 
-  overflow:hidden;margin:20px 0
+ overflow:hidden;margin:20px 0
 
 }
 
@@ -66,15 +62,15 @@ h1{font-size:30px;margin:6px 0 2px}
 
 .buttons{
 
-  display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:9px
+ display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:9px
 
 }
 
 .buttons button{
 
-  border:0;border-radius:14px;padding:16px 8px;
+ border:0;border-radius:14px;padding:16px 8px;
 
-  font-size:17px;font-weight:900
+ font-size:17px;font-weight:900
 
 }
 
@@ -84,9 +80,19 @@ h1{font-size:30px;margin:6px 0 2px}
 
 .next{
 
-  margin-top:22px;padding:15px;background:#102536;
+ margin-top:22px;padding:15px;background:#102536;
 
-  border-radius:15px;color:#d9e5ee
+ border-radius:15px;color:#d9e5ee
+
+}
+
+.sound{
+
+ margin-top:12px;
+
+ border:0;border-radius:12px;padding:12px 18px;
+
+ font-weight:800;font-size:15px
 
 }
 
@@ -106,11 +112,7 @@ h1{font-size:30px;margin:6px 0 2px}
 
 <div id="phase" class="phase">PRONTO</div>
 
-<div id="exercise" class="exercise">
-
-Premi START
-
-</div>
+<div id="exercise" class="exercise">Premi START</div>
 
 <div id="timer" class="timer">15:00</div>
 
@@ -136,15 +138,21 @@ RISCALDAMENTO + CIRCUITO + FINALE
 
 </div>
 
+<button class="sound" onclick="testSound()">🔊 PROVA SUONO</button>
+
 <div id="next" class="next">
 
-🔊 Segnali acustici automatici ai cambi.
+🔊 3 • 2 • 1 prima di ogni cambio
 
 </div>
 
 <div class="small">
 
-Su iPhone premi START una volta per attivare l'audio.
+🔔 BEEP lungo basso = STOP / RECUPERO<br>
+
+🔔🔔 Doppio beep alto = VIA / LAVORO<br><br>
+
+Su iPhone premi START una volta per attivare l'audio.<br>
 
 Tieni la pagina aperta durante l'allenamento.
 
@@ -228,57 +236,121 @@ let tick=null;
 
 let audioCtx=null;
 
-let total=steps.reduce((a,s)=>a+s[2],0);
-
 let elapsed=0;
+
+const total=steps.reduce((a,s)=>a+s[2],0);
 
 function unlockAudio(){
 
- if(!audioCtx)
+ if(!audioCtx){
 
- audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+   audioCtx=new (window.AudioContext||window.webkitAudioContext)();
 
- if(audioCtx.state==="suspended")
+ }
 
- audioCtx.resume();
+ if(audioCtx.state==="suspended"){
 
-}
-
-function beep(freq=850,dur=.16,count=1){
-
- unlockAudio();
-
- let t=audioCtx.currentTime;
-
- for(let n=0;n<count;n++){
-
-  let o=audioCtx.createOscillator();
-
-  let g=audioCtx.createGain();
-
-  o.connect(g);
-
-  g.connect(audioCtx.destination);
-
-  o.frequency.value=freq;
-
-  g.gain.setValueAtTime(.001,t+n*.22);
-
-  g.gain.exponentialRampToValueAtTime(.35,t+n*.22+.015);
-
-  g.gain.exponentialRampToValueAtTime(.001,t+n*.22+dur);
-
-  o.start(t+n*.22);
-
-  o.stop(t+n*.22+dur+.03);
+   audioCtx.resume();
 
  }
 
 }
 
+function tone(freq,duration,delay=0,volume=.45){
+
+ unlockAudio();
+
+ const start=audioCtx.currentTime+delay;
+
+ const osc=audioCtx.createOscillator();
+
+ const gain=audioCtx.createGain();
+
+ osc.connect(gain);
+
+ gain.connect(audioCtx.destination);
+
+ osc.type="sine";
+
+ osc.frequency.value=freq;
+
+ gain.gain.setValueAtTime(.001,start);
+
+ gain.gain.exponentialRampToValueAtTime(volume,start+.01);
+
+ gain.gain.exponentialRampToValueAtTime(.001,start+duration);
+
+ osc.start(start);
+
+ osc.stop(start+duration+.03);
+
+}
+
+/* beep breve del conto 3-2-1 */
+
+function countdownBeep(){
+
+ tone(750,.09,0,.35);
+
+}
+
+/* STOP: suono basso e lungo */
+
+function stopBeep(){
+
+ tone(430,.48,0,.55);
+
+}
+
+/* VIA: due suoni alti */
+
+function goBeep(){
+
+ tone(1050,.16,0,.55);
+
+ tone(1050,.16,.23,.55);
+
+}
+
+/* cambio esercizio durante il riscaldamento */
+
+function changeBeep(){
+
+ tone(900,.13,0,.5);
+
+ tone(1150,.18,.18,.55);
+
+}
+
+/* fine allenamento */
+
+function finishBeep(){
+
+ tone(850,.22,0,.55);
+
+ tone(1050,.22,.30,.55);
+
+ tone(1300,.50,.60,.60);
+
+}
+
+function testSound(){
+
+ unlockAudio();
+
+ countdownBeep();
+
+ setTimeout(()=>{
+
+   goBeep();
+
+ },400);
+
+}
+
 function render(){
 
- let s=steps[i];
+ const s=steps[i];
 
  document.getElementById("phase").textContent=s[0];
 
@@ -288,21 +360,17 @@ function render(){
 
  "0:"+String(left).padStart(2,"0");
 
- let st=document.getElementById("state");
+ const st=document.getElementById("state");
 
- st.textContent=
+ st.textContent=s[3]==="rest" ? "RECUPERO" : "LAVORO";
 
- s[3]==="rest" ? "RECUPERO" : "LAVORO";
-
- st.className=
-
- "state "+s[3];
+ st.className="state "+s[3];
 
  document.getElementById("bar").style.width=
 
  (elapsed/total*100)+"%";
 
- let j=i+1;
+ const j=i+1;
 
  document.getElementById("next").textContent=
 
@@ -322,71 +390,105 @@ function startTimer(){
 
  running=true;
 
+ /* segnale di partenza */
+
  if(elapsed===0){
 
-  beep(1050,.13,2);
+   goBeep();
 
-  render();
+   render();
 
  }
 
  tick=setInterval(()=>{
 
-  if(!running)return;
+   if(!running)return;
 
-  left--;
+   left--;
 
-  elapsed++;
+   elapsed++;
 
-  if(left<=3 && left>0 && steps[i][3]==="rest")
+   /* 3 - 2 - 1 PRIMA DI QUALSIASI CAMBIO */
 
-   beep(650,.07,1);
+   if(left===3 || left===2 || left===1){
 
-  if(left<=0){
-
-   let was=steps[i][3];
-
-   i++;
-
-   if(i>=steps.length){
-
-    clearInterval(tick);
-
-    running=false;
-
-    document.getElementById("phase").textContent=
-
-    "ALLENAMENTO COMPLETATO";
-
-    document.getElementById("exercise").textContent=
-
-    "GRANDE! 🧤⚽";
-
-    document.getElementById("timer").textContent="0:00";
-
-    document.getElementById("state").textContent="FINE";
-
-    document.getElementById("bar").style.width="100%";
-
-    beep(1100,.18,3);
-
-    return;
+     countdownBeep();
 
    }
 
-   if(was==="work")
+   if(left<=0){
 
-    beep(520,.22,1);
+     const oldStep=steps[i];
 
-   else
+     i++;
 
-    beep(1050,.13,2);
+     if(i>=steps.length){
 
-   left=steps[i][2];
+       clearInterval(tick);
 
-  }
+       tick=null;
 
-  render();
+       running=false;
+
+       document.getElementById("phase").textContent=
+
+       "ALLENAMENTO COMPLETATO";
+
+       document.getElementById("exercise").textContent=
+
+       "GRANDE! 🧤⚽";
+
+       document.getElementById("timer").textContent="0:00";
+
+       document.getElementById("state").textContent="FINE";
+
+       document.getElementById("bar").style.width="100%";
+
+       document.getElementById("next").textContent=
+
+       "Allenamento terminato 💪";
+
+       finishBeep();
+
+       return;
+
+     }
+
+     const newStep=steps[i];
+
+     /*
+
+       NUOVO BLOCCO RECUPERO = STOP
+
+       NUOVO BLOCCO LAVORO = VIA
+
+       RISCALDAMENTO -> RISCALDAMENTO = CAMBIO
+
+     */
+
+     if(newStep[3]==="rest"){
+
+       stopBeep();
+
+     }
+
+     else if(oldStep[3]==="rest" && newStep[3]==="work"){
+
+       goBeep();
+
+     }
+
+     else{
+
+       changeBeep();
+
+     }
+
+     left=newStep[2];
+
+   }
+
+   render();
 
  },1000);
 
@@ -398,9 +500,9 @@ function pauseTimer(){
 
  if(tick){
 
-  clearInterval(tick);
+   clearInterval(tick);
 
-  tick=null;
+   tick=null;
 
  }
 
@@ -418,9 +520,7 @@ function resetTimer(){
 
  document.getElementById("phase").textContent="PRONTO";
 
- document.getElementById("exercise").textContent=
-
- "Premi START";
+ document.getElementById("exercise").textContent="Premi START";
 
  document.getElementById("timer").textContent="15:00";
 
@@ -428,15 +528,13 @@ function resetTimer(){
 
  "RISCALDAMENTO + CIRCUITO + FINALE";
 
- document.getElementById("state").className=
-
- "state work";
+ document.getElementById("state").className="state work";
 
  document.getElementById("bar").style.width="0";
 
  document.getElementById("next").textContent=
 
- "🔊 Segnali acustici automatici ai cambi.";
+ "🔊 3 • 2 • 1 prima di ogni cambio";
 
 }
 
