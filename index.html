@@ -1,1 +1,449 @@
-<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Timer Portiere 40/20</title><style>body{font-family:-apple-system,sans-serif;background:#111;color:#fff;text-align:center;margin:0}main{max-width:600px;margin:auto;padding:30px 18px}.card{background:#222;border-radius:22px;padding:25px}.clock{font-size:90px;font-weight:900}.ex{font-size:28px;font-weight:800;margin:12px}.sub{color:#aaa}.bar{height:12px;background:#444;border-radius:10px;overflow:hidden;margin:20px 0}.fill{height:100%;background:#fff}.buttons{display:flex;gap:8px}.buttons button{flex:1;padding:15px 4px;border:0;border-radius:14px;font-weight:800;font-size:15px}.start{background:#fff;color:#111}.other{background:#333;color:#fff}.note{color:#aaa;font-size:14px;line-height:1.5;margin-top:20px}</style></head><body><main><div class="card"><b id="phase">PRONTO</b><div id="ex" class="ex">Ponte glutei</div><div id="clock" class="clock">40</div><div id="round" class="sub">Esercizio 1 di 9</div><div class="bar"><div id="fill" class="fill"></div></div></div><div class="buttons"><button id="start" class="start">▶ START</button><button id="pause" class="other">⏸ PAUSA</button><button id="reset" class="other">↺ RESET</button></div><div class="note">🔊 1 beep = STOP · ultimi 3″ del recupero = beep brevi · 2 beep = VIA.<br>Tieni lo schermo acceso durante l'allenamento.</div></main><script>const ex=['Ponte glutei','Affondi indietro','Squat esplosivi','Skater laterali','Plank','Passetti da portiere','Side plank destro','Side plank sinistro','Reazione laterale'];let i=0,w=true,l=40,r=false,t,c;const $=x=>document.getElementById(x);function tone(f,d,delay=0){if(!c)return;setTimeout(()=>{let o=c.createOscillator(),g=c.createGain();o.frequency.value=f;g.gain.setValueAtTime(.25,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+d)},delay)}function go(){tone(850,.12);tone(1100,.18,170)}function stop(){tone(400,.35)}function draw(){if(i>=ex.length)return;$('phase').textContent=r?(w?'LAVORO':'RECUPERO'):'PRONTO / PAUSA';$('ex').textContent=w?ex[i]:'Recupera';$('clock').textContent=l;$('round').textContent='Esercizio '+(i+1)+' di '+ex.length;$('fill').style.width=(l/(w?40:20)*100)+'%'}function tick(){if(!r)return;l--;if(!w&&l<=3&&l>0)tone(700,.08);if(l<=0){if(w){w=false;l=20;stop()}else{i++;if(i>=ex.length){r=false;clearInterval(t);$('phase').textContent='COMPLETATO';$('ex').textContent='Allenamento finito 🧤';$('clock').textContent='✓';return}w=true;l=40;go()}}draw()}$('start').onclick=()=>{if(!c){let A=window.AudioContext||window.webkitAudioContext;if(A)c=new A()}if(c&&c.state==='suspended')c.resume();if(r)return;r=true;go();t=setInterval(tick,1000);draw()};$('pause').onclick=()=>{r=false;clearInterval(t);draw()};$('reset').onclick=()=>{r=false;clearInterval(t);i=0;w=true;l=40;draw()};draw();</script></body></html>
+<!doctype html>
+
+<html lang="it">
+
+<head>
+
+<meta charset="utf-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+<meta name="theme-color" content="#071522">
+
+<title>Timer Portiere 15 minuti</title>
+
+<style>
+
+*{box-sizing:border-box}
+
+body{
+
+  margin:0;
+
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+
+  background:#071522;
+
+  color:white;
+
+  text-align:center
+
+}
+
+.wrap{max-width:700px;margin:auto;padding:22px 16px 40px}
+
+.tag{color:#a9ff4f;font-weight:900;letter-spacing:1px}
+
+h1{font-size:30px;margin:6px 0 2px}
+
+.phase{font-size:19px;font-weight:800;color:#a9ff4f;margin-top:18px}
+
+.exercise{
+
+  font-size:25px;font-weight:900;min-height:62px;
+
+  display:flex;align-items:center;justify-content:center
+
+}
+
+.timer{font-size:92px;font-weight:900;line-height:1;margin:14px 0}
+
+.state{font-size:22px;font-weight:900;margin:10px}
+
+.work{color:#a9ff4f}
+
+.rest{color:#ffd34d}
+
+.progress{
+
+  height:12px;background:#243341;border-radius:99px;
+
+  overflow:hidden;margin:20px 0
+
+}
+
+.bar{height:100%;width:0;background:#a9ff4f}
+
+.buttons{
+
+  display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:9px
+
+}
+
+.buttons button{
+
+  border:0;border-radius:14px;padding:16px 8px;
+
+  font-size:17px;font-weight:900
+
+}
+
+.start{background:#40d34f;color:#06120a}
+
+.pause,.reset{background:#e8eef4}
+
+.next{
+
+  margin-top:22px;padding:15px;background:#102536;
+
+  border-radius:15px;color:#d9e5ee
+
+}
+
+.small{font-size:14px;color:#a9b7c2;margin-top:18px}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="wrap">
+
+<div class="tag">⚽ CIRCUITO PORTIERE</div>
+
+<h1>15 MINUTI</h1>
+
+<div id="phase" class="phase">PRONTO</div>
+
+<div id="exercise" class="exercise">
+
+Premi START
+
+</div>
+
+<div id="timer" class="timer">15:00</div>
+
+<div id="state" class="state work">
+
+RISCALDAMENTO + CIRCUITO + FINALE
+
+</div>
+
+<div class="progress">
+
+<div id="bar" class="bar"></div>
+
+</div>
+
+<div class="buttons">
+
+<button class="start" onclick="startTimer()">▶ START</button>
+
+<button class="pause" onclick="pauseTimer()">Ⅱ PAUSA</button>
+
+<button class="reset" onclick="resetTimer()">↻ RESET</button>
+
+</div>
+
+<div id="next" class="next">
+
+🔊 Segnali acustici automatici ai cambi.
+
+</div>
+
+<div class="small">
+
+Su iPhone premi START una volta per attivare l'audio.
+
+Tieni la pagina aperta durante l'allenamento.
+
+</div>
+
+</div>
+
+<script>
+
+const steps=[
+
+["RISCALDAMENTO","Marcia / corsetta sul posto",30,"work"],
+
+["RISCALDAMENTO","Mobilità anche",30,"work"],
+
+["RISCALDAMENTO","Squat tranquilli",30,"work"],
+
+["RISCALDAMENTO","Marcia / corsetta sul posto",30,"work"],
+
+["RISCALDAMENTO","Mobilità anche",30,"work"],
+
+["RISCALDAMENTO","Squat tranquilli",30,"work"],
+
+["CIRCUITO PRINCIPALE","Ponte glutei",40,"work"],
+
+["RECUPERO","Preparati al prossimo esercizio",20,"rest"],
+
+["CIRCUITO PRINCIPALE","Affondi indietro alternati",40,"work"],
+
+["RECUPERO","Preparati al prossimo esercizio",20,"rest"],
+
+["CIRCUITO PRINCIPALE","Squat esplosivi",40,"work"],
+
+["RECUPERO","Preparati al prossimo esercizio",20,"rest"],
+
+["CIRCUITO PRINCIPALE","Skater laterali",40,"work"],
+
+["RECUPERO","Preparati al prossimo esercizio",20,"rest"],
+
+["CIRCUITO PRINCIPALE","Plank",40,"work"],
+
+["RECUPERO","Preparati al prossimo esercizio",20,"rest"],
+
+["CIRCUITO PRINCIPALE","Passetti da portiere",40,"work"],
+
+["RECUPERO","Preparati al prossimo esercizio",20,"rest"],
+
+["CIRCUITO PRINCIPALE","Side plank destro",40,"work"],
+
+["RECUPERO","Preparati al prossimo esercizio",20,"rest"],
+
+["CIRCUITO PRINCIPALE","Side plank sinistro",40,"work"],
+
+["RECUPERO","Preparati al prossimo esercizio",20,"rest"],
+
+["CIRCUITO PRINCIPALE","Reazione laterale",40,"work"],
+
+["RECUPERO","Preparati al finale",20,"rest"],
+
+["FINALE","Partenza esplosiva destra / sinistra",30,"work"],
+
+["RECUPERO","Respira e preparati",30,"rest"],
+
+["FINALE","Partenza esplosiva destra / sinistra",30,"work"],
+
+["RECUPERO","Respira e preparati",30,"rest"],
+
+["FINALE","Partenza esplosiva destra / sinistra",30,"work"],
+
+["RECUPERO","Ultimo recupero",30,"rest"]
+
+];
+
+let i=0;
+
+let left=steps[0][2];
+
+let running=false;
+
+let tick=null;
+
+let audioCtx=null;
+
+let total=steps.reduce((a,s)=>a+s[2],0);
+
+let elapsed=0;
+
+function unlockAudio(){
+
+ if(!audioCtx)
+
+ audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+
+ if(audioCtx.state==="suspended")
+
+ audioCtx.resume();
+
+}
+
+function beep(freq=850,dur=.16,count=1){
+
+ unlockAudio();
+
+ let t=audioCtx.currentTime;
+
+ for(let n=0;n<count;n++){
+
+  let o=audioCtx.createOscillator();
+
+  let g=audioCtx.createGain();
+
+  o.connect(g);
+
+  g.connect(audioCtx.destination);
+
+  o.frequency.value=freq;
+
+  g.gain.setValueAtTime(.001,t+n*.22);
+
+  g.gain.exponentialRampToValueAtTime(.35,t+n*.22+.015);
+
+  g.gain.exponentialRampToValueAtTime(.001,t+n*.22+dur);
+
+  o.start(t+n*.22);
+
+  o.stop(t+n*.22+dur+.03);
+
+ }
+
+}
+
+function render(){
+
+ let s=steps[i];
+
+ document.getElementById("phase").textContent=s[0];
+
+ document.getElementById("exercise").textContent=s[1];
+
+ document.getElementById("timer").textContent=
+
+ "0:"+String(left).padStart(2,"0");
+
+ let st=document.getElementById("state");
+
+ st.textContent=
+
+ s[3]==="rest" ? "RECUPERO" : "LAVORO";
+
+ st.className=
+
+ "state "+s[3];
+
+ document.getElementById("bar").style.width=
+
+ (elapsed/total*100)+"%";
+
+ let j=i+1;
+
+ document.getElementById("next").textContent=
+
+ j<steps.length
+
+ ? "Prossimo: "+steps[j][1]
+
+ : "Ultimo blocco 💪";
+
+}
+
+function startTimer(){
+
+ unlockAudio();
+
+ if(running)return;
+
+ running=true;
+
+ if(elapsed===0){
+
+  beep(1050,.13,2);
+
+  render();
+
+ }
+
+ tick=setInterval(()=>{
+
+  if(!running)return;
+
+  left--;
+
+  elapsed++;
+
+  if(left<=3 && left>0 && steps[i][3]==="rest")
+
+   beep(650,.07,1);
+
+  if(left<=0){
+
+   let was=steps[i][3];
+
+   i++;
+
+   if(i>=steps.length){
+
+    clearInterval(tick);
+
+    running=false;
+
+    document.getElementById("phase").textContent=
+
+    "ALLENAMENTO COMPLETATO";
+
+    document.getElementById("exercise").textContent=
+
+    "GRANDE! 🧤⚽";
+
+    document.getElementById("timer").textContent="0:00";
+
+    document.getElementById("state").textContent="FINE";
+
+    document.getElementById("bar").style.width="100%";
+
+    beep(1100,.18,3);
+
+    return;
+
+   }
+
+   if(was==="work")
+
+    beep(520,.22,1);
+
+   else
+
+    beep(1050,.13,2);
+
+   left=steps[i][2];
+
+  }
+
+  render();
+
+ },1000);
+
+}
+
+function pauseTimer(){
+
+ running=false;
+
+ if(tick){
+
+  clearInterval(tick);
+
+  tick=null;
+
+ }
+
+}
+
+function resetTimer(){
+
+ pauseTimer();
+
+ i=0;
+
+ left=steps[0][2];
+
+ elapsed=0;
+
+ document.getElementById("phase").textContent="PRONTO";
+
+ document.getElementById("exercise").textContent=
+
+ "Premi START";
+
+ document.getElementById("timer").textContent="15:00";
+
+ document.getElementById("state").textContent=
+
+ "RISCALDAMENTO + CIRCUITO + FINALE";
+
+ document.getElementById("state").className=
+
+ "state work";
+
+ document.getElementById("bar").style.width="0";
+
+ document.getElementById("next").textContent=
+
+ "🔊 Segnali acustici automatici ai cambi.";
+
+}
+
+resetTimer();
+
+</script>
+
+</body>
+
+</html>
